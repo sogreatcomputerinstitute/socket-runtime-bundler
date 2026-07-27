@@ -15,8 +15,10 @@ def compile_socket_app(project_zip, platform):
     if project_zip is None:
         return None, "❌ Compilation Aborted: Please drag and drop or upload your project assets ZIP file first."
         
-    if platform not in ["linux", "android"]:
-        return None, "❌ Compilation Aborted: An unsupported target deployment OS extension package was requested."
+   # Change this line inside compile_socket_app:
+   if platform not in ["linux", "android", "win"]:
+        return None, "❌ Compilation Aborted: An unsupported target platform was requested."
+
 
     # Create an isolated workflow tracking ID inside /tmp to support multi-user operations safely
     session_id = f"socket_build_{int(time.time())}"
@@ -109,7 +111,7 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="yellow", secondary_hue="slat
             file_input = gr.File(label="Upload Project Archive (ZIP Only)", file_types=[".zip"], elem_classes="input-box")
             
             # Selection controls for choosing output types
-            platform_select = gr.Radio(choices=["linux", "android"], label="Choose Build Target File Extension", value="android")
+            platform_select = gr.Radio(choices=["linux", "android", "win"], label="Choose Build Target File Extension", value="android")
             
             # Execute compiler button actions mapping into custom class styling parameters
             build_btn = gr.Button("🚀 Trigger Compilation Pipeline", variant="primary", elem_classes="primary-btn")
