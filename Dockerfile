@@ -3,8 +3,12 @@ FROM ubuntu:22.04
 # Prevent interactive prompts freezing the installation layer
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install all critical utilities, build tools, Node, and WebKit development libraries
-# Explicitly including clang-14 and libwebkit2gtk-4.1-dev to clear the missing shared library error!
+# Configure environment path structures for Android SDK, Java, and local utilities
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV ANDROID_HOME=/usr/lib/android-sdk
+ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
+
+# 1. Install critical system utilities, Java 17, and compiler tools
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -20,27 +24,26 @@ RUN apt-get update && apt-get install -y \
     libwebkit2gtk-4.1-dev \
     python3 \
     python3-pip \
-    nodejs \
-    npm \
     android-sdk \
     && rm -rf /var/lib/apt/lists/*
 
-# Map precise configuration path variables directly into the OS framework
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV ANDROID_HOME=/usr/lib/android-sdk
-ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
+# 2. FIXED: Explicitly download and execute the official NodeSource Node.js v20 Setup Script
+# This overwrites Ubuntu's legacy distribution defaults and installs the proper modern runtime environment!
+RUN curl -fsSL https://nodesource.com | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set up standard application directory links
+# 3. Install the Socket Supply Co. CLI compiler engine globally
+RUN npm install -g @socketsupply/socket
+
+# 4. Accept Android structural operating licenses securely 
+RUN yes | sdkmanager --licenses || true
+
+# Setup the runtime application directory
 WORKDIR /app
 
 # Install Gradio web interface components into Python pipeline context
 RUN pip3 install gradio
-
-# Install the Socket Supply Co. CLI compiler engine globally
-RUN npm install -g @socketsupply/socket
-
-# Accept Android structural operating licenses securely 
-RUN yes | sdkmanager --licenses || true
 
 # Copy application configuration architecture files into the container
 COPY . .
