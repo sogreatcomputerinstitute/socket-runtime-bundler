@@ -8,36 +8,38 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV ANDROID_HOME=/opt/android-sdk
 ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/34.0.0"
 
-# ADDED MINGW FOR WINDOWS CROSS-COMPILATION SUPPORT
+# Install core utilities, Java OpenJDK 17, Python 3, and Linux desktop compilation dependencies
+# FIXED: Added clang-14 and explicitly upgraded to libwebkit2gtk-4.1-dev as demanded by ssc
 RUN apt-get update && apt-get install -y \
     curl \
     git \
     unzip \
     zip \
     build-essential \
+    clang-14 \
     g++-mingw-w64 \
     gcc-mingw-w64 \
     openjdk-17-jdk \
     pkg-config \
     libgtk-3-dev \
-    libwebkit2gtk-4.0-dev \
+    libwebkit2gtk-4.1-dev \
     python3 \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# FIXED: Node.js v20 secure modern repository setup layer (Replaces the broken pipe script link)
+# Fix Node.js v20 secure modern repository setup layer
 RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && curl -fsSL https://nodesource.com | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://nodesource.com nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
     && apt-get update && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the Socket Supply Co. CLI compiler engine globally
 RUN npm install -g @socketsupply/socket
 
-# FIXED: Replaced google.com with the official Android SDK Command Line utilities package link
+# Fetch and install Android Command Line Tools securely into system directories
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
-    && curl -o /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
+    && curl -o /tmp/cmdline-tools.zip https://google.com \
     && unzip /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools \
     && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
     && rm /tmp/cmdline-tools.zip
