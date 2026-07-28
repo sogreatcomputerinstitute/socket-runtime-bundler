@@ -8,8 +8,9 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV ANDROID_HOME=/usr/lib/android-sdk
 ENV PATH="/usr/local/node/bin:${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
 
-# 1. Install all core system tools, Java 17 compiler, and native WebKit graphics engines
-RUN apt-get update && apt-get install -y \
+# 1. Clear any residual third-party repositories and install all core system tools
+RUN rm -rf /etc/apt/sources.list.d/* \
+    && apt-get update && apt-get install -y \
     curl \
     git \
     unzip \
@@ -28,8 +29,7 @@ RUN apt-get update && apt-get install -y \
     xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. FIXED: Download and manually mount the exact official, pre-compiled Node.js v20 LTS binary pool 
-# This completely cuts out PPA repos, broken layout paths, and external setup scripts!
+# 2. FIXED: Download and unpack the official pre-compiled Node.js v20 LTS binary pool directly
 RUN mkdir -p /usr/local/node \
     && curl -fsSL https://nodejs.org | tar -xJ --strip-components=1 -C /usr/local/node
 
