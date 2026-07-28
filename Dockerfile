@@ -24,17 +24,21 @@ RUN apt-get update && apt-get install -y \
     libwebkit2gtk-4.1-dev \
     python3 \
     python3-pip \
+    ca-certificates \
+    gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js v20 via official automated script
-RUN curl -fsSL https://nodesource.com | bash - \
-    && apt-get install -y nodejs \
+# FIXED: Modern, secure repository installation block for Node.js v20 (No more legacy bash script links)
+RUN mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://nodesource.com | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://nodesource.com nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the Socket Supply Co. CLI compiler engine globally
 RUN npm install -g @socketsupply/socket
 
-# FIXED: Ensuring the absolute official Android SDK download link is explicitly used
+# Fetch and install Android Command Line Tools securely into system directories
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
     && curl -o /tmp/cmdline-tools.zip https://google.com \
     && unzip /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools \
