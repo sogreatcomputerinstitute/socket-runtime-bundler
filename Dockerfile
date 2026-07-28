@@ -3,12 +3,13 @@ FROM ubuntu:22.04
 # Prevent interactive prompts freezing the installation layer
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Configure environment path structures for Android SDK, Java, and custom Node.js binaries
+# Configure environment path structures for Android SDK, Java, and NVM Node links
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV ANDROID_HOME=/usr/lib/android-sdk
-ENV PATH="/usr/local/node/bin:${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
+ENV NVM_DIR=/root/.nvm
+ENV PATH="${NVM_DIR}/versions/node/v20.11.0/bin:${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
 
-# 1. Install all core system tools, Java 17 compiler, and native WebKit graphics engines
+# 1. Install core system components, Java 17, and internal WebKit visual libraries
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -25,15 +26,17 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     android-sdk \
-    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. GUARANTEED FIXED: Download and manually mount official, pre-compiled Node.js v20 LTS binaries
-# This completely bypasses broken apt-get repositories, legacy versions, and external configuration scripts!
-RUN mkdir -p /usr/local/node \
-    && curl -fsSL https://nodejs.org | tar -xJ --strip-components=1 -C /usr/local/node
+# 2. FIXED: Use the official NVM installation engine to fetch Node.js v20 safely
+# This avoids broken URL links, bad file formats, and system cache errors entirely!
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash \
+    . "$NVM_DIR/nvm.sh" \
+    && nvm install 20.11.0 \
+    && nvm use v20.11.0 \
+    && nvm alias default 20.11.0
 
-# 3. Install the Socket Supply Co. CLI compiler engine globally using our new modern Node environment
+# 3. Install the Socket Supply Co. CLI compiler engine globally
 RUN npm install -g @socketsupply/socket
 
 # 4. Accept Android structural operating licenses securely 
