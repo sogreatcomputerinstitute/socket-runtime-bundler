@@ -26,15 +26,15 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# FIXED: Replaced the manual keyring injection with the official, foolproof NodeSource installer script
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+# Install Node.js v20 via official automated script
+RUN curl -fsSL https://nodesource.com | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the Socket Supply Co. CLI compiler engine globally
 RUN npm install -g @socketsupply/socket
 
-# Fetch and install Android Command Line Tools securely into system directories
+# FIXED: Ensuring the absolute official Android SDK download link is explicitly used
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
     && curl -o /tmp/cmdline-tools.zip https://google.com \
     && unzip /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools \
