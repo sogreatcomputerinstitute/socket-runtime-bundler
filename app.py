@@ -15,10 +15,8 @@ def compile_socket_app(project_zip, platform):
     if project_zip is None:
         return None, "❌ Compilation Aborted: Please drag and drop or upload your project assets ZIP file first."
         
-   # Change this line inside compile_socket_app:
-   if platform not in ["linux", "android", "win"]:
+    if platform not in ["linux", "android", "win"]:
         return None, "❌ Compilation Aborted: An unsupported target platform was requested."
-
 
     # Create an isolated workflow tracking ID inside /tmp to support multi-user operations safely
     session_id = f"socket_build_{int(time.time())}"
@@ -57,7 +55,6 @@ def compile_socket_app(project_zip, platform):
             return None, f"❌ Socket Compiler Runtime Error:\n\n{error_log}"
 
         # 4. Extract and Locate Valid Deliverable Binary Streams
-        # Socket Runtime places built standalone artifacts directly into an internal 'build' path
         output_dir = os.path.join(workspace_dir, "build")
         if not os.path.exists(output_dir):
             shutil.rmtree(workspace_dir, ignore_errors=True)
@@ -86,7 +83,6 @@ def compile_socket_app(project_zip, platform):
 # CUSTOM DARK & GOLDEN YELLOW GRADIO INTERFACE DESIGN
 # ==========================================
 
-# Inject global CSS rules to force a consistent dark UI aesthetic matching your premium design specifications
 custom_css = """
 body, .gradio-container { background-color: #121212 !important; color: #E0E0E0 !important; }
 gr-markdown h1, h1 { color: #FFD700 !important; font-family: sans-serif; font-weight: bold; }
@@ -95,7 +91,6 @@ gr-markdown h1, h1 { color: #FFD700 !important; font-family: sans-serif; font-we
 .input-box, .output-box, textarea, input, .file-preview { background-color: #1A1D24 !important; color: #FFFFFF !important; border: 1px solid #2D3139 !important; }
 """
 
-# Build interface layouts via Gradio Blocks
 with gr.Blocks(theme=gr.themes.Default(primary_hue="yellow", secondary_hue="slate"), css=custom_css) as demo:
     gr.Markdown(
         """
@@ -107,28 +102,20 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="yellow", secondary_hue="slat
     with gr.Row():
         with gr.Column(scale=1):
             gr.Markdown("### 📥 Source Inputs")
-            # File component allows zip drag-and-drop actions natively
             file_input = gr.File(label="Upload Project Archive (ZIP Only)", file_types=[".zip"], elem_classes="input-box")
-            
-            # Selection controls for choosing output types
             platform_select = gr.Radio(choices=["linux", "android", "win"], label="Choose Build Target File Extension", value="android")
-            
-            # Execute compiler button actions mapping into custom class styling parameters
             build_btn = gr.Button("🚀 Trigger Compilation Pipeline", variant="primary", elem_classes="primary-btn")
             
         with gr.Column(scale=1):
             gr.Markdown("### 📤 Compiler Outputs")
-            # Delivery container path mapping handles output file triggers automatically
             file_output = gr.File(label="Download Compiled Application Package Bundle", elem_classes="output-box")
             log_output = gr.Textbox(label="System Compiler Telemetry Logs", lines=12, interactive=False, elem_classes="input-box")
 
-    # Wire up single execution click bindings
     build_btn.click(
         fn=compile_socket_app,
         inputs=[file_input, platform_select],
         outputs=[file_output, log_output]
     )
 
-# CRITICAL SYSTEM NOTE: Dynamically read custom server routing assignments assigned by Railway configuration engines
 railway_port = int(os.environ.get("PORT", 8080))
 demo.launch(server_name="0.0.0.0", server_port=railway_port)
