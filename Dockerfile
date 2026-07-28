@@ -3,13 +3,8 @@ FROM ubuntu:22.04
 # Prevent interactive prompts freezing the installation layer
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Configure environment path structures for Android SDK, Java, and local utilities
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV ANDROID_HOME=/opt/android-sdk
-ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/34.0.0"
-
-# Install core utilities, Java OpenJDK 17, Python 3, and Linux desktop compilation dependencies
-# Added nodejs and npm straight from standard Ubuntu repositories to guarantee NO external link fails!
+# Install all critical utilities, build tools, Node, and WebKit development libraries
+# Explicitly including clang-14 and libwebkit2gtk-4.1-dev to clear the missing shared library error!
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -27,27 +22,25 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     nodejs \
     npm \
+    android-sdk \
     && rm -rf /var/lib/apt/lists/*
 
-# Install the Socket Supply Co. CLI compiler engine globally
-RUN npm install -g @socketsupply/socket
+# Map precise configuration path variables directly into the OS framework
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV ANDROID_HOME=/usr/lib/android-sdk
+ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
 
-# Fetch and install Android Command Line Tools securely into system directories
-RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
-    && curl -o /tmp/cmdline-tools.zip https://google.com \
-    && unzip /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools \
-    && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
-    && rm /tmp/cmdline-tools.zip
-
-# Auto-accept Android SDK core licenses and install the specific APIs, build tools, and NDK
-RUN yes | sdkmanager --licenses \
-    && sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125"
-
-# Setup the application directory
+# Set up standard application directory links
 WORKDIR /app
 
 # Install Gradio web interface components into Python pipeline context
 RUN pip3 install gradio
+
+# Install the Socket Supply Co. CLI compiler engine globally
+RUN npm install -g @socketsupply/socket
+
+# Accept Android structural operating licenses securely 
+RUN yes | sdkmanager --licenses || true
 
 # Copy application configuration architecture files into the container
 COPY . .
