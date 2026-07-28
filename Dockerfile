@@ -9,7 +9,6 @@ ENV ANDROID_HOME=/opt/android-sdk
 ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/34.0.0"
 
 # Install core utilities, Java OpenJDK 17, Python 3, and Linux desktop compilation dependencies
-# FIXED: Added clang-14 and explicitly upgraded to libwebkit2gtk-4.1-dev as demanded by ssc
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -27,11 +26,9 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix Node.js v20 secure modern repository setup layer
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://nodesource.com | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://nodesource.com nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update && apt-get install -y nodejs \
+# FIXED: Replaced the manual keyring injection with the official, foolproof NodeSource installer script
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the Socket Supply Co. CLI compiler engine globally
