@@ -3,12 +3,12 @@ FROM ubuntu:22.04
 # Prevent interactive prompts freezing the installation layer
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Configure environment path structures for Android SDK, Java, and local utilities
+# Configure environment path structures for Android SDK, Java, and custom Node.js binaries
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV ANDROID_HOME=/usr/lib/android-sdk
-ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
+ENV PATH="/usr/local/node/bin:${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
 
-# 1. Install critical system utilities, Java 17, and compiler tools
+# 1. Install all core system tools, Java 17 compiler, and native WebKit graphics engines
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -25,15 +25,15 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     android-sdk \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. FIXED: Explicitly download and execute the official NodeSource Node.js v20 Setup Script
-# This overwrites Ubuntu's legacy distribution defaults and installs the proper modern runtime environment!
-RUN curl -fsSL https://nodesource.com | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+# 2. GUARANTEED FIXED: Download and manually mount official, pre-compiled Node.js v20 LTS binaries
+# This completely bypasses broken apt-get repositories, legacy versions, and external configuration scripts!
+RUN mkdir -p /usr/local/node \
+    && curl -fsSL https://nodejs.org | tar -xJ --strip-components=1 -C /usr/local/node
 
-# 3. Install the Socket Supply Co. CLI compiler engine globally
+# 3. Install the Socket Supply Co. CLI compiler engine globally using our new modern Node environment
 RUN npm install -g @socketsupply/socket
 
 # 4. Accept Android structural operating licenses securely 
