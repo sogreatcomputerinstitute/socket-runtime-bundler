@@ -9,6 +9,7 @@ ENV ANDROID_HOME=/opt/android-sdk
 ENV PATH="${PATH}:${JAVA_HOME}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/34.0.0"
 
 # Install core utilities, Java OpenJDK 17, Python 3, and Linux desktop compilation dependencies
+# Added nodejs and npm straight from standard Ubuntu repositories to guarantee NO external link fails!
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -24,15 +25,8 @@ RUN apt-get update && apt-get install -y \
     libwebkit2gtk-4.1-dev \
     python3 \
     python3-pip \
-    ca-certificates \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
-
-# FIXED: Modern, secure repository installation block for Node.js v20 (No more legacy bash script links)
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://nodesource.com | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://nodesource.com nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update && apt-get install -y nodejs \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the Socket Supply Co. CLI compiler engine globally
