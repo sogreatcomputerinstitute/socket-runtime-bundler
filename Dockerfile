@@ -29,7 +29,7 @@ RUN rm -rf /etc/apt/sources.list.d/* \
     xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. FIXED: Download and unpack the official pre-compiled Node.js v20 LTS binary pool directly
+# 2. Download and unpack the official pre-compiled Node.js v20 LTS binary pool directly
 RUN mkdir -p /usr/local/node \
     && curl -fsSL https://nodejs.org | tar -xJ --strip-components=1 -C /usr/local/node
 
